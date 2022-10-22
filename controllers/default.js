@@ -1,6 +1,6 @@
 exports.install = function () {
 	ROUTE('GET /upload', upload_file_view);
-	ROUTE('POST /upload', upload_data, 10000);
+	ROUTE('POST /upload', upload_data,['upload'], 1024 * 5);
 	ROUTE('GET /', view_home_page);
 };
 
@@ -23,14 +23,17 @@ function upload_data() {
 		obj.size = file.size;
 		obj.type = file.type;
 		obj.ext = file.extension;
-		
-		file.fs('upload', obj.id, obj.ext, function (err) {
+		obj.url = '/download/' + obj.id + '.' + obj.ext;
+
+		console.log(obj);
+		file.fs('files', obj.id, function (err) {
 			if (err) {
 				output.push(err);
 			}
 			next();
-		})
-		console.log(obj)
-	})
+		}, function () {
+			self.json(output);
+		});
+	});
 	self.redirect('upload');
 };
